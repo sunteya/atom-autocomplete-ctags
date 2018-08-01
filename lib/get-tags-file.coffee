@@ -1,5 +1,6 @@
 path = require 'path'
 fs = require 'fs'
+glob = require 'glob'
 
 isFileAsync = (filePath) ->
   new Promise((resolve, reject) ->
@@ -15,9 +16,11 @@ module.exports = (directoryPath) ->
   return Promise.reject() unless directoryPath?
 
   new Promise (resolve) ->
-    filePaths = ['tags', 'TAGS', '.tags', '.TAGS', '.git/tags', '.git/TAGS'].map((fileName) ->
-      path.join(directoryPath, fileName)
+    globFilePaths = ['tags', 'TAGS', '.tags', '.TAGS', '.git/tags', '.git/TAGS', '*.tags'].map((fileName) ->
+      glob.sync(path.join(directoryPath, fileName))
     )
+    filePaths = [].concat.apply([], globFilePaths)
+
     promises = filePaths.map((filePath) ->
       isFileAsync(filePath)
     )
